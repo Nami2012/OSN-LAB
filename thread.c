@@ -31,18 +31,7 @@ void *sort(void  *arg){
 				}
 			}
 		}
-	 if(half == 1)
-		{ for(int i=0;i<size/2-2;i++)
-			for(int j=0;j<size/2-i-2;j++)
-			{
-				if(array[j]>array[j+1]){
-					temp = array[j];
-					array[j] = array[j+1];
-					array[j+1] = temp;
-				}
-			}
-		}
-		
+
 	else if(half == 2)
 		{ int k=0;
 			for(int i=size/2;i<size-1;i++)
@@ -60,6 +49,41 @@ void *sort(void  *arg){
 		k++;}
 		}
 	 
+}
+
+void merge(long *ar,int num){
+	int m[num];
+	int i=0,j=num/2,k=0;
+	while(i<num/2 &&j<num){
+		if( ar[i] > ar[j])
+			{ m[k++]=ar[j++]; 
+			  }
+		else
+		 {  m[k++] = ar[i++];
+			}		
+	}
+	
+	if(i>=num/2) 
+		{
+		  while(j<num){
+		  m[k++] = ar[j++];
+		  }}
+	
+	if(j>=num) 
+		{
+		  while(i<num/2){
+		  m[k++] = ar[i++];
+		  }
+		  }
+	 
+		  
+		printf("\n");
+		for(int i=0;i<num;i++)
+		{
+			printf("%d",m[i]);
+			} 
+
+
 }
 	
 int main(){
@@ -93,11 +117,13 @@ int main(){
 	pthread_join(t1,NULL);
 	pthread_join(t2,NULL);
 	
-	printf("\n");
+	printf("\nThread Sort :");
 	for(int i=0;i<num;i++)
 	{
 		printf("%ld",ar[i]);
 		}
+		
+	merge(ar,num);
 
 	return 0;
 }
