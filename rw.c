@@ -62,8 +62,6 @@ void* reader_create(void *args){
 		sem_post(&wrt);
 		
 	sem_post(&mutex);
-	
-	  sleep(1);
 	}
 
 }
@@ -75,13 +73,13 @@ void* writer_create(void *args){
    
 	while(1){
 		
-		sem_wait(&wrt);
+		if(sem_trywait(&wrt)==0){
 		printf("\n \n Writer %d starts:",i+1);
 		wr();
 		printf("\n Writer %d End",i+1);
-		sem_post(&wrt);
-		
-		   sleep(1);
+		sem_post(&wrt);}
+		else
+		printf("semaphore already acquired");
 	}
 }
 int main(){
