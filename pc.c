@@ -12,28 +12,23 @@ sem_t mutex, empty,full;
 
 int *buf,bufpos=-1,pc,cc,bufsize;
 
-int produce(pthread_t self){
-    int i=0;
+int produce(){
+   
     int p = 1+rand()%20;
 
-    while(!pthread_equal(*(producers+1),self) && i<pc)
-        i++;
-    
-    printf("Producer %d produced %d \n\n",i+1,p);
+    printf("\n produced %d \n\n",p);
     return p;
 }
 
-void consume(int p,pthread_t self){
-    int i=0;
-    while(!pthread_equal(*(consumers + i),self) && i<cc)
-        i++;
-
-        printf("buffer status:");
+void consume(int p){
+   
+   
+        printf("\n buffer status:");
 
         for(int i=0;i<=bufpos;i++){
             printf("%d ",*(buf+i));
         }
-    printf("\n Consumer %d consumed %d",i+1,p);
+    printf("\n consumed %d",p);
 }
 
 void display_full(){
@@ -50,8 +45,17 @@ void display_empty(){
 
 
 void *producer(void *arg){
+    int i=0;
+    while(!pthread_equal(*(producers+1),pthread_self()) && i<pc)
+        i++;
+    
    while(1){
-        int p = produce(pthread_self());
+      
+
+        sem_wait(&empty);
+        sem_wait(&mutex);
+       	printf("\n\n Producer %d starts ",i+1);
+	  int p = produce();
         ++bufpos;
         if(bufpos>=bufsize)
         {
@@ -60,40 +64,41 @@ void *producer(void *arg){
             --bufpos;
             continue;
         }
-
-        sem_wait(&empty);
-        sem_wait(&mutex);
-       
+       	
         *(buf+bufpos) = p;
         
         sem_post(&mutex);
         sem_post(&full);
-
-        sleep(5 + rand()%5);
+	printf("\n Producer %d ends ",i+1);
+        sleep(rand()%5+1);
     }
 }
 
 
 void* consumer(void *arg){
     int c;
-
+    int i=0;
+     while(!pthread_equal(*(consumers + i),pthread_self()) && i<cc)
+        i++;
     while (1)
     {
-        if(bufpos<=-1)
-        {
-            display_empty;
-            sleep(3+rand()%4);
-            continue;
-        }
+       
         sem_wait(&full);
         sem_wait(&mutex);
-
+	printf("\n\n consumer %d starts ",i+1);
+	 if(bufpos<=-1)
+        {
+            display_empty;
+            sleep(rand()%4+1);
+            continue;
+        }
         c = *(buf+bufpos);
-        consume(c,pthread_self());
+        consume(c);
         --bufpos;
 
         sem_post(&mutex);
         sem_post(&empty);
+        printf("\n consumer %d ends ",i+1);
         sleep(3+rand()%5);
 
     }
@@ -136,9 +141,7 @@ int main(){
 
     for(int i=0;i<cc;i++){
         //create consumer threads
-        pthread_create(consumers+i,NULL,&consumer,NULL);
-        
-        
+        pthread_create(consumers+i,NULL,&consumer,NULL);  
     }
 
 
@@ -147,14 +150,7 @@ int main(){
     }
 
     for(int i=0;i<cc;i++){
-
         //join consumer threads
-
         pthread_join(*(consumers+i),NULL);
     }
-
-
-
-    
-
 }
