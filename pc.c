@@ -15,8 +15,7 @@ int *buf,bufpos=-1,pc,cc,bufsize;
 int produce(){
    
     int p = 1+rand()%20;
-
-    printf("\n produced %d \n\n",p);
+     printf("\n produced %d",p);
     return p;
 }
 
@@ -53,7 +52,7 @@ void *producer(void *arg){
       
 
         sem_wait(&empty);
-        sem_wait(&mutex);
+        if(sem_trywait(&mutex)==0){
        	printf("\n\n Producer %d starts ",i+1);
 	  int p = produce();
         ++bufpos;
@@ -69,7 +68,9 @@ void *producer(void *arg){
         
         sem_post(&mutex);
         sem_post(&full);
-	printf("\n Producer %d ends ",i+1);
+	printf("\n Producer %d ends ",i+1);}
+    else{
+        	printf("\n producer %d cant write.semaphore already acquired",i);}
         sleep(rand()%5+1);
     }
 }
@@ -84,7 +85,7 @@ void* consumer(void *arg){
     {
        
         sem_wait(&full);
-        sem_wait(&mutex);
+        if(sem_trywait(&mutex)==0){
 	printf("\n\n consumer %d starts ",i+1);
 	 if(bufpos<=-1)
         {
@@ -98,7 +99,9 @@ void* consumer(void *arg){
 
         sem_post(&mutex);
         sem_post(&empty);
-        printf("\n consumer %d ends ",i+1);
+        printf("\n consumer %d ends ",i+1);}
+           else{
+        	printf("\n consumer %d cant write.semaphore already acquired",i);}
         sleep(3+rand()%5);
 
     }

@@ -4,10 +4,12 @@
 #include<time.h>
 #include<pthread.h>
 #include<semaphore.h>
+#include<sched.h>
+
 pthread_t *reader,*writer;
+
 int *buf,bufsize,bufpos=-1;
 int r_count,w_count,rc_count=0;
-
 
 sem_t mutex,rdr,wrt;
 
@@ -19,7 +21,8 @@ void display(){
 }
 
 void rd(int p){
-    printf("\n read %d ",p);
+    printf("\n read %d",p);
+    display();
 }
 
 void wr(){
@@ -29,7 +32,8 @@ void wr(){
  	 if(bufpos>=bufsize)
   		bufpos =0;
   	 *(buf+bufpos) = p;
-	 display();
+ 
+    	 printf("\n wrote %d \n\n",p);
 
   
 }
@@ -42,8 +46,7 @@ void* reader_create(void *args){
 	while(1){
 	
 	if(sem_trywait(&mutex)==0){
-	
-	printf("\n \n Reader %d starts:",i);
+    printf("\n \n Reader %d starts:",p);
 	rc_count++;
 	
 	if(rc_count==1)
@@ -52,24 +55,23 @@ void* reader_create(void *args){
 	sem_post(&mutex);
 	c=*(buf+bufpos);
 	rd(c);
+	
 	sem_wait(&mutex);
 	
 	rc_count--;
-	
-
+	printf("\n Reader %d End",p);
 	if(rc_count == 0)
-		  sem_post(&wrt);
-	{ printf("\n Reader %d End",i);}	
+		sem_post(&wrt);
+		
 	sem_post(&mutex);
-
-	}
-
-	else{
+    }
+    else{
 	
 		printf("\n reader %d cant write.semaphore already acquired",i);
 	}
 	sleep(rand()%10 + 1);
 	}
+
 }
 
 void* writer_create(void *args){
@@ -84,8 +86,8 @@ void* writer_create(void *args){
 		wr();
 		printf("\n Writer %d End",i+1);
 		sem_post(&wrt);}
-		else{
-		printf("\n writer %d cant write.semaphore already acquired",i);}
+		else
+		printf("\n writer %d cant write.semaphore already acquired",i);
 		sleep(rand()%10 + 1);
 	}
 	
@@ -94,7 +96,7 @@ int main(){
 	srand(time(0));
 	
 	 //initialize values
-	 	 r_count = rand()%20 +1;
+	 r_count = rand()%20 +1;
     	 printf("\n Number of Readers are: %d",r_count);
     	 reader = (pthread_t*)malloc(r_count*sizeof(pthread_t));
 
@@ -117,9 +119,16 @@ int main(){
     	  for(int i=0;i<r_count;i++){
         	pthread_create(reader+i,NULL,&reader_create,NULL);
         	}
+        int wr;
+        pthread_attr_t attr;
+        struct sched_param param;
 
-    	  for(int i=0;i<w_count;i++){
-        	pthread_create(writer+i,NULL,&writer_create,NULL);
+        wr = pthread_attr_init(&attr);
+
+        	
+        
+    	  for(int i=0;i<w_count;i++){      
+            pthread_create(writer+i,&attr,&writer_create,NULL);
     		}
 
 
