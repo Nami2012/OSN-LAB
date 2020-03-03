@@ -2,3 +2,6 @@ shm/r.out
 shm/w.out
 mq/s.out
 mq/r.out
+mq/mq.out
+mq/rec.out
+mq/send.out
