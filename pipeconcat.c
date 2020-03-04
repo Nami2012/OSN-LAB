@@ -11,6 +11,7 @@ void rand_string(char *str,int size){
     for(int i=0;i<size;i++){
        str[i] = string[rand()%strlen(string)-rand()%5];
     }
+    str[size-1]='\0';
 }
 
 char *concat(char * s1,char*s2){
@@ -26,7 +27,7 @@ char *concat(char * s1,char*s2){
         
     }
     res[size] = '\0';
-     printf("\n string: %s ",res);
+
     return res;
 }
 int main(){
@@ -57,7 +58,7 @@ int main(){
 
           rand_string(ptr,size);
 	    
-          printf("first string: %s",ptr);
+          printf("first string: %s \n",ptr);
           
           //write to pipe
           write(p[1], ptr, size); 
@@ -68,7 +69,7 @@ int main(){
           int nbytes;
           read(pr[0], buf,size+size1);
             close(pr[0]);
-          printf("\n concatenated string :%s",buf);
+          printf("concatenated string :%s \n",buf);
 	    }
 	
     else if(pid==0)
@@ -77,7 +78,7 @@ int main(){
 	       	char *str = (char *) malloc(size * sizeof(char));
             int nbytes;
             read(p[0], str, size);
-            printf("\n first string received : %s", str); 
+            printf("first string received : %s \n", str); 
             close(p[0]);
             
             //random string generation
@@ -85,7 +86,7 @@ int main(){
           
             char *tr = (char *) malloc(size1 * sizeof(char));
             rand_string(tr,size1);
-	        printf("\n second string: %s",tr);
+	        printf("second string: %s\n",tr);
           
             char *res =  (char *) malloc((size1+size) * sizeof(char));
             res =  concat(str,tr);

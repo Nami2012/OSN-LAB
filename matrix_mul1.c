@@ -5,42 +5,48 @@
 #include<pthread.h>
 
 
+int ar1[6][6],ar2[6][6];
+	int C[6][6];
+	int r1,c1,r2,c2;	
+
 struct thread_data{
-	int  first;
-	int second;
-	int product;
+	int  i,j;
+	int sum;
 };
 
 
 void *multiply(void  *arg){
 	 struct thread_data *data;
 	 data = (struct thread_data *)arg;
-	 int first = data->first;
-	 int second = data->second;
-	 data->product = first*second;
-	 //printf("product: %d \n ",first*second);
-	 pthread_exit(NULL);
+	 data->sum =0;
+     for(int k=0;k<r2;k++)
+		 
+		 {
+		  
+		  data->sum += ar1[data->i][k]*ar2[k][data->j];
+         }
+         C[data->i][data->j] = data->sum;
+    
+     pthread_exit(NULL);
 }
 	
 int main(){
-	struct thread_data t;
+	
 	srand(time(0));
 	
 	//matrix size
 
 	int *ret;
-	int r1,c1,r2,c2;
+
 	r1= rand()%3+1;
 	c1= rand()%3+1;
 	r2= c1;
 	c2= rand()%3+1;
-	
+	int tid =0;
 	
 	
 	//matrix values
 	int val;
-	int ar1[r1][c1],ar2[r2][c2];
-	int C[r1][c2];
 	
 	//first matrix
 	printf("\nfirst matrix \n");
@@ -77,29 +83,24 @@ int main(){
 	
 	//thread creation
 	
-	pthread_t t1;
+	pthread_t thread[r1*c2];
 	
 	for(int i=0;i<r1;i++)
 	{
 		for(int j=0;j<c2;j++)
-		{ C[i][j]=0;
-		 for(int k=0;k<c1;k++)
+		{   
+            struct thread_data *t =(struct thread_data*) malloc(sizeof(struct thread_data));
+            t->i = i;
+		    t->j = j;
+            pthread_create(&thread[tid++],NULL,multiply,(void *)t);   
+	    }
+    }
 		 
-		 {
-		  t.first = ar1[i][k];
-		  t.second = ar2[k][j];
-		  //printf("first: %d  second :%d",t.first,t.second);
-		  pthread_create(&t1,NULL,multiply,(void *)&t);
-		  pthread_join(t1,NULL);
-		  
-		  C[i][j] += t.product;
-		  //printf("\n %d",C[i][j]);
-		
-	
+         for(int i=0;i<tid;i++)
+         {
+		  pthread_join(thread[i],NULL);
 		 }
-	
-	     }
-	}
+
 	printf("\n");
 	for(int i=0;i<r1;i++)
 		{ for(int j =0;j<c2;j++)

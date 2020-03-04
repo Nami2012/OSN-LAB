@@ -3,34 +3,54 @@
 #include<stdlib.h>
 #include<time.h>
 #include<string.h>
+#include<unistd.h>
 
 #include<sys/wait.h>
 
-int countwords(char *str,int size){
+int countwords(char *str,int ssize){
      int count = 0, i;
- 
+    int size = strlen(str);
     for (i = 0;i<size;i++)
     {
-        if ((str[i] == ' ' && str[i+1] != ' ') || str[i]==',' || (str[i] =='.'&&str[i]!=' '))
+        if ((str[i] == ' ' && str[i+1] != ' ') || str[i]==',' || (str[i] =='.'&&str[i]!=' ') ||(str[i] =='\n')  )
             count++;    
     }
-    if(str[size-1] != ' ')
+    if(str[size-1] != ' ' )
         count++;
+    
+    if(str[size-1] == '\n' )
+        count--;
     return count;
 }
-int countch(char *str,int size){
+
+int countch(char *str,int ssize){
      int count = 0, i;
- 
+      int size = strlen(str);
     for (i = 0;i<size;i++)
     {
-        if (str[i] == ' ')
+        if (str[i] == ' ' || str[i] == '\n')
             continue;
         count++;    
     }
         return count;
     }
+
+
+int countlines(char *str,int ssize){
+     int count = 1, i;
+      int size = strlen(str);
+    for (i = 0;i<size;i++)
+    {
+        if (str[i] == '\n')
+            count++;    
+    }
+    if (str[size-1] == '\n')
+        count--;    
+    
+        return count;
+    }
 void rand_string(char *str,int size){
-    char string[] = "abcd  ef ghabcdefghijklmnopq rstuvw xyzABCDEFGHIJKLMNOPQRS TUVWXYZ0 123456789,.-#'?! ";
+    char string[] = "ab \ncd \n efgh\nabcd \nefghijkl \n \n mnopq rstuvw xyzABCDE FGHIJKLMNOPQRS TUVW\n XYZ0 1234 \n 56789,.-#'?! ";
     for(int i=0;i<size;i++){
        str[i] = string[rand()%strlen(string)];
     }
@@ -58,12 +78,15 @@ int main(){
           
           //string generation
           char buf[128];
-          char *ptr = (char *) malloc(size * sizeof(char));
+          char *ptr = (char *) malloc(100 * sizeof(char));
           rand_string(ptr,size);
-	      printf("Generated string : %s",ptr);
+          printf("Enter Message:");
+          scanf("%[^\t]",ptr);
+	      printf("Generated string : %s ",ptr);
           
+          //fprintf(stdout,"\n Generated string : %s \n",ptr);
           //write to pipe
-          write(p[1], ptr, size); 
+          write(p[1], ptr, 100); 
           close(p[1]);
           
           //read from pipe
@@ -74,19 +97,22 @@ int main(){
 	    }
 	
     else if(pid==0)
-		{
+		{   
             //read string from pipe
-	       	char *str = (char *) malloc(size * sizeof(char));
+	       	char *str = (char *) malloc(100 * sizeof(char));
             int nbytes;
-            read(p[0], str, size);
-            printf("\nReceived String: %s\n", str); 
+
+            read(p[0], str, 100);
             close(p[0]);
+
+            printf("\n Received String: %s\n", str); 
+            
 
 
             //count characters and words         
             int ch =countch(str,size);
             int w  = countwords(str,size);
-        
+            int lines = countlines(str,size);
             //write into file
             FILE *fptr;
             fptr = fopen("stringcharacteristics.txt","w");
@@ -101,8 +127,9 @@ int main(){
             else{
                 
 
-                fprintf(fptr,"\n characters = %d",ch);
-                fprintf(fptr,"\n words = %d",w);
+                fprintf(fptr,"\n characters = %d;",ch);
+                fprintf(fptr,"\n words = %d;",w);
+                 fprintf(fptr,"\n lines = %d;",lines);
                 fclose(fptr);
          
    

@@ -77,10 +77,10 @@ void merge(long *ar,int num){
 		  }
 	 
 		  
-		printf("\n");
+		printf("\nMerged using thread: ");
 		for(int i=0;i<num;i++)
 		{
-			printf("%d",m[i]);
+			printf("%d ",m[i]);
 			} 
 
 
@@ -100,7 +100,7 @@ int main(){
 		} 
 	for(int i=0;i<num;i++)
 	{
-		printf("%ld",ar[i]);
+		printf("%ld ",ar[i]);
 		}
 	t[0].num =num;
 	t[0].array = ar;
@@ -120,7 +120,7 @@ int main(){
 	printf("\nThread Sort :");
 	for(int i=0;i<num;i++)
 	{
-		printf("%ld",ar[i]);
+		printf("%ld ",ar[i]);
 		}
 		
 	merge(ar,num);

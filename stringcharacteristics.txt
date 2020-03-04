@@ -1,3 +1,4 @@
 
- characters = 16
- words = 2
+ characters = 8;
+ words = 2;
+ lines = 2;
